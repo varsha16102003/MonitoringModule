@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Heart Rate Monitoring</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .dashboard-header {
+            background-color: #007bff;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .content-wrapper {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .content {
+            width: 65%;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section h3 {
+            margin: 10px 0;
+        }
+
+        .heart-rate {
+            font-size: 24px;
+            color: #333;
+            text-align: center;
+        }
+
+        .image-section {
+            width: 30%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .image-section img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-header">
+        <h1>Heart Rate Dashboard</h1>
+    </div>
+
+    <!-- Container with content on left and image on right -->
+    <div class="content-wrapper">
+        <!-- Left Content Section -->
+        <div class="content">
+            <!-- Patient Details Section -->
+            <div class="section">
+                <h3>Name: John Doe</h3>
+                <h3>Age: 55</h3>
+                <h3>Disease Found: Coronary Artery Disease</h3>
+                <h3>Treatment Given: Angioplasty</h3>
+            </div>
+
+            <!-- Symptoms and Doctor Section -->
+            <div class="section">
+                <h3>Symptoms: Chest Pain, Shortness of Breath</h3>
+                <h3>Handled by Doctor: Dr. Smith</h3>
+            </div>
+
+            <!-- Treatment Dates Section -->
+            <div class="section">
+                <h3>Date Joined: 2023-06-15</h3>
+                <h3>Date of Treatment: 2023-07-10</h3>
+            </div>
+
+            <!-- Surgeries Section -->
+            <div class="section">
+                <h3>Any Surgeries: Yes</h3>
+                <h3>Surgery Details: Coronary Artery Bypass Surgery on 2023-07-12</h3>
+            </div>
+    <div id="heartRate"><h4>Loading...</h4></div>
+    </div>
+    <div class="image-section">
+        <img src="https://via.placeholder.com/300" alt="Heart Image">
+    </div>
+</div>
+    
+
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+
+    <!-- Firebase Realtime Database -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+        
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAMQTJwuF-QJpuohulQXnFWQpBR_78vbFs",
+            authDomain: "heart-rate-monitoring-12.firebaseapp.com",
+            databaseURL: "https://heart-rate-monitoring-12-default-rtdb.firebaseio.com",
+            projectId: "heart-rate-monitoring-12",
+            storageBucket: "heart-rate-monitoring-12.appspot.com",
+            messagingSenderId: "672751976456",
+            appId: "1:672751976456:web:053713e0238ef71de211bd",
+            measurementId: "G-Y10VFBJN6L"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const database = getDatabase(app);
+
+        // Reference to the heart rate data in your Firebase Realtime Database
+        const heartRateRef = ref(database, 'heartrate/BPM');
+
+        const botToken = '7505109294:AAEUyh7l4I2mWeGg67U57Xcdje1a5j3P7oo';
+        const chatId = '1478719315';
+        const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+        
+
+        // Function to send a message to Telegram
+        function sendTelegramMessage(message) {
+            fetch(telegramUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    chat_id: chatId,
+                    text: message
+                })
+            })
+    
+            .then(response => response.json())
+            .then(data => console.log('Telegram API response:', data))
+            .catch(error => console.error('Error sending message:', error));
+        }
+
+        // Define the heart rate range
+        const minHeartRate = 60;  // example value
+        const maxHeartRate = 100; // example value
+
+        // Display the heart rate data and check for out-of-range values
+        onValue(heartRateRef, (snapshot) => {
+            const heartRate = snapshot.val();
+            document.getElementById('heartRate').innerText = `Current Heart Rate: ${heartRate} BPM`;
+
+            // Check if heart rate is out of range
+            if (heartRate < minHeartRate || heartRate > maxHeartRate) {
+                sendTelegramMessage(`Alert! Heart Rate out of range: ${heartRate} BPM`);
+            }
+        });
+
+        // Display the heart rate data on your website
+
+    </script>
+</body>
+</html>
